@@ -34,7 +34,7 @@ int vector_init(vector *v, size_t capacity) {
         return -1;
     }
     // 实际内存为capacity + 1,为了存储cap
-    int *head = malloc((capacity + 1) * sizeof(int));
+    int *head = malloc(capacity * sizeof(int));
     if (!head) {
         set_null(v);
         return -1;
@@ -138,7 +138,7 @@ int reserve(vector *v, size_t capacity) {
     if (capacity >= SIZE_MAX / sizeof(int))
         return -1;
     size_t o_size = size(v);
-    int *new_p = realloc(v->data, (capacity + 1) * sizeof(int));
+    int *new_p = realloc(v->data, capacity * sizeof(int));
     if (!new_p)
         return -1;
     *v =
@@ -154,7 +154,7 @@ int shrink_to_fit(vector *v) {
         vector_destroy(v);
         return 0;
     }
-    int *new_p = realloc(v->data, (o_size + 1) * sizeof(int));
+    int *new_p = realloc(v->data, o_size * sizeof(int));
     if (!new_p)
         return -1;
     *v = (vector){.data = new_p, .end = new_p + o_size, .cap = new_p + o_size};

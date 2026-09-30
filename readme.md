@@ -49,4 +49,34 @@ READ of size 4 at 0x... thread T0
 
 ## 实现思路
 
-待完成……
+### vector_init
+- `vector`中的`data`,`end`还有`cap`指针指向分配在堆中内存，但整个`vector`都是在栈上的
+- 使用`malloc`申请一块大小为`capacity * sizeof(int)`的连续内存，这样方便后续释放内存
+
+![init](/src/img/initial.png)
+
+### vector_destroy
+- 释放堆内存，这里一定要传`data`指针，就能将整个申请的堆内存释放掉，因为可以通过`data`找到对应的`malloc_chunk`，其中记录着之前申请内存的大小
+### size
+- 因为申请的内存连续的，所以`size = end - data`
+### capacity
+- 与`size`同理，`capacity = cap - data`
+### empty
+- 就是`!size()`
+### get和set
+- 直接通过`data`偏移指定的长度即可找到
+### front和back
+- 与`get`是一回事
+### push_back
+- 难点在扩容，在`realloc`之后，可能内存会进行转移，所以`data`,`end`和`cap`都需要重新计算
+- 扩容前后，`data`总是指向起始位置，`end`与`data`的相对位置不变，`cap`总是指向最后一个内存再偏移一个单位
+![extend](/src/img/extend.png)
+### pop_back
+- 让`end`指针左移一个单位即可
+### reserve
+- 重新分配到所需大小即可（与扩容类似）
+### shrink_to_fit
+- 与`reserve`相似，不过指定`capacity == size`
+### clear
+- 直接让`data == end`即可
+
