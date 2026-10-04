@@ -50,20 +50,20 @@ READ of size 4 at 0x... thread T0
 
 ## 实现思路
 ### vector_init
-    关键点在于在堆中申请内存，但`vector`整体是在栈上的，`data`,`end`,和`cap`指针分别指向堆上的内存
+关键点在于在堆中申请内存，但`vector`整体是在栈上的，`data`,`end`,和`cap`指针分别指向堆上的内存
 > `data`指针除了`realloc`之外不进行修改，保证其指向申请内存的起始，否则在`free`不仅不方便,而且找不到`malloc_chunk`(在glibc中)，易引发安全问题
 ![init](./img/init.png)
 ### vector_destory
-    释放`data`指针指向的内存，千万不要写成
-    `free(v)`了，它是在栈上的。由于申请内存时堆分配器记录的内存的大小和位置等信息，所以释放内存只需要写`free(v->data)`
+释放`data`指针指向的内存，千万不要写成
+`free(v)`了，它是在栈上的。由于申请内存时堆分配器记录的内存的大小和位置等息，所以释放内存只需要写`free(v->data)`
 
 ### size和capacity
-    由于申请的是一块连续的内存，所以直接相应指针相减即可
+ 由于申请的是一块连续的内存，所以直接相应指针相减即可
 > 相减不需要除以4,这是因为在ISO C中除了`void*`外，指针加减会移动对应类型所占的字节数
 ### get,set,front和back
-    在 `data`指针的基础上进行偏移即可
+在 `data`指针的基础上进行偏移即可
 ### push_back,reserve和shrink_to_fit
-    先判断是否需要扩容，进行扩容时，使用`realloc`应注意:
+先判断是否需要扩容，进行扩容时，使用`realloc`应注意:
 - 先使用`new_ptr`接收，判断是否realloc成功，避免内存泄露
 - 分类讨论申请内存为0的情况。在某些版本中，与`free(ptr)`可等同，要避免use-after-free；在C23中，这是未定义行为
 > 记得移动`cap`指针
