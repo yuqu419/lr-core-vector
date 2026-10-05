@@ -2,17 +2,15 @@
 
 #include "vector.h"
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
-#ifndef MAX_CAPACITY
-#define MAX_CAPACITY (SIZE_MAX / sizeof(int) - 1)
-#endif
 static inline int check_not_null(const vector *v) {
     return v && v->data && v->cap && v->end;
 }
 int vector_init(vector *v, size_t capacity) {
     if (!v)
         return -1;
-    if (capacity > MAX_CAPACITY) {
+    if (capacity >= SIZE_MAX / sizeof(int)) {
         *v = (vector){.cap = NULL, .data = NULL, .end = NULL};
         return -1;
     }
@@ -92,9 +90,10 @@ int push_back(vector *v, int value) {
     }
     size_t cur_size = size(v);
     if (cur_size >= capacity(v)) {
+    if(cur_size >= SIZE_MAX / sizeof(int) / 2){
+        return -1;
+    }
         size_t new_cap = cur_size == 0 ? 1 : cur_size * 2;
-        if (new_cap > MAX_CAPACITY)
-            new_cap = MAX_CAPACITY;
         int res = reserve(v, new_cap);
         if (res == -1)
             return -1;
@@ -122,10 +121,10 @@ int reserve(vector *v, size_t capacity) {
             return -1;
         return 0;
     }
-    if (capacity > MAX_CAPACITY)
+    if (capacity >= SIZE_MAX / sizeof(int))
         return -1;
     size_t cur_size = size(v);
-    if (capacity <= cur_size)
+    if (capacity <= v->cap - v->data)
         return 0;
     size_t new_cap = sizeof(int) * capacity;
     int *new_ptr = (int *)realloc(v->data, new_cap);
